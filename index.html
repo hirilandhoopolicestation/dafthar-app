@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Expatriate Dafthar</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dafthar">
+<meta name="theme-color" content="#0E4F4F">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --teal-deep:#0E4F4F; --teal-ink:#0A3B3B; --paper:#F7F3E8; --paper-dim:#EFE9D8;
+    --ink:#1F2A24; --ink-soft:#5B6A62; --gold:#B08D3E; --gold-soft:#D8C089;
+    --rust:#C1553A; --green-ok:#3E7D4F; --line:#DCD5C0; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased; min-height:100vh; padding-bottom:calc(40px + env(safe-area-inset-bottom));}
+  .hidden{display:none !important;}
+
+  header{background:linear-gradient(160deg,var(--teal-deep),var(--teal-ink)); color:var(--paper);
+    padding:calc(22px + env(safe-area-inset-top)) 20px 22px; position:relative; overflow:hidden;}
+  header::after{content:""; position:absolute; inset:0;
+    background:repeating-linear-gradient(115deg, rgba(255,255,255,0.035) 0 2px, transparent 2px 44px); pointer-events:none;}
+  .eyebrow{font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold-soft); display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .eyebrow .dot{width:5px;height:5px;border-radius:50%;background:var(--gold-soft);}
+  h1{font-family:'Fraunces',serif; font-weight:600; font-size:24px; letter-spacing:-.01em; margin:0; line-height:1.15;}
+  .sub{font-size:13px; color:rgba(247,243,232,0.65); margin-top:6px;}
+  .head-row{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+  .signout{background:rgba(255,255,255,0.12); color:var(--paper); border:1px solid rgba(255,255,255,0.2);
+    border-radius:8px; padding:8px 12px; font-size:12.5px; font-weight:600; white-space:nowrap;}
+  .count-strip{display:flex; gap:18px; margin-top:16px;}
+  .count-item{font-family:'JetBrains Mono',monospace;}
+  .count-item .n{font-size:20px;font-weight:600;color:var(--paper);display:block;}
+  .count-item .l{font-size:10px;color:rgba(247,243,232,0.55);letter-spacing:.08em;text-transform:uppercase;}
+
+  main{padding:18px 16px 8px; max-width:640px; margin:0 auto;}
+
+  .card{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:20px;
+    margin-bottom:18px; box-shadow:0 1px 2px rgba(15,30,25,0.04);}
+  .card-title{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:0 0 14px; color:var(--teal-deep);}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--ink-soft); margin-bottom:6px;}
+  .field input{width:100%; padding:12px 13px; border-radius:9px; border:1px solid var(--line); font-size:16px;
+    font-family:'Inter',sans-serif; background:var(--paper); color:var(--ink);}
+  .field input#f-passport{font-family:'JetBrains Mono',monospace; letter-spacing:.03em;}
+  .field input:focus{outline:2px solid var(--teal-deep); outline-offset:1px; background:var(--white);}
+  .btn-row{display:flex; gap:10px; margin-top:16px;}
+  button{font-family:'Inter',sans-serif; font-weight:600; font-size:14.5px; border:none; border-radius:9px;
+    padding:13px 18px; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+  .btn-primary{background:var(--teal-deep); color:var(--paper); flex:1;}
+  .btn-primary:active{background:var(--teal-ink);}
+  .btn-primary:disabled{opacity:.55;}
+  .btn-ghost{background:transparent; color:var(--ink-soft); border:1px solid var(--line);}
+  .link-btn{background:none; border:none; color:var(--teal-deep); font-weight:600; font-size:13.5px;
+    padding:6px 0; text-decoration:underline; text-underline-offset:2px;}
+  .error-msg{color:var(--rust); font-size:13px; margin-top:10px; display:none;}
+  .error-msg.show{display:block;}
+
+  /* Auth screen */
+  #view-auth{max-width:420px; margin:40px auto 0; padding:0 20px;}
+  .auth-hero{text-align:center; margin-bottom:22px;}
+  .auth-hero .badge{width:52px;height:52px;border-radius:14px;background:var(--teal-deep); margin:0 auto 14px;
+    display:flex;align-items:center;justify-content:center;}
+  .auth-hero h1{font-family:'Fraunces',serif; font-size:22px; color:var(--teal-deep); margin:0 0 4px;}
+  .auth-hero p{font-size:13.5px; color:var(--ink-soft); margin:0;}
+  .tab-row{display:flex; gap:4px; background:var(--paper-dim); border-radius:10px; padding:4px; margin-bottom:20px;}
+  .tab-btn{flex:1; background:none; border:none; padding:9px; border-radius:7px; font-size:13.5px; font-weight:600; color:var(--ink-soft);}
+  .tab-btn.active{background:var(--white); color:var(--teal-deep); box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+
+  /* Status screens */
+  .status-screen{max-width:420px; margin:60px auto 0; padding:0 24px; text-align:center;}
+  .status-screen .icon-wrap{width:56px;height:56px;border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center;}
+  .status-screen h2{font-family:'Fraunces',serif; font-size:20px; margin:0 0 8px; color:var(--ink);}
+  .status-screen p{font-size:14px; color:var(--ink-soft); line-height:1.5; margin:0 0 20px;}
+
+  /* Admin */
+  .admin-nav{display:flex; gap:4px; background:var(--paper-dim); border-radius:10px; padding:4px; margin-bottom:16px;}
+  .admin-nav button{flex:1; background:none; padding:9px; border-radius:7px; font-size:13px; font-weight:600; color:var(--ink-soft); position:relative;}
+  .admin-nav button.active{background:var(--white); color:var(--teal-deep); box-shadow:0 1px 2px rgba(0,0,0,0.06);}
+  .badge-count{background:var(--rust); color:#fff; font-size:10px; font-weight:700; border-radius:20px; padding:1px 6px; margin-left:5px;}
+  .user-row{display:flex; justify-content:space-between; align-items:center; padding:13px 14px; border-bottom:1px solid var(--line); gap:10px;}
+  .user-row:last-child{border-bottom:none;}
+  .user-row .u-name{font-size:14.5px; font-weight:600;}
+  .user-row .u-email{font-size:12px; color:var(--ink-soft);}
+  .user-row .u-actions{display:flex; gap:6px;}
+  .pill-btn{padding:8px 12px; border-radius:7px; font-size:12.5px;}
+  .pill-btn.approve{background:var(--green-ok); color:#fff;}
+  .pill-btn.reject{background:var(--paper-dim); color:var(--rust);}
+  .status-tag{font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:20px;}
+  .status-tag.approved{background:#E4F1E7; color:var(--green-ok);}
+  .status-tag.pending{background:#FBF0DE; color:var(--gold);}
+  .status-tag.rejected{background:#F6E4DF; color:var(--rust);}
+
+  /* Search + ledger (registry) */
+  .search-wrap{margin-bottom:16px;}
+  .search-wrap input{width:100%; padding:13px 14px; border-radius:10px; border:1px solid var(--line);
+    background:var(--white); font-size:15px; font-family:'Inter',sans-serif; color:var(--ink);}
+  .search-wrap input:focus{outline:2px solid var(--teal-deep); outline-offset:1px;}
+  .ledger-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+  .ledger-head h2{font-family:'Fraunces',serif; font-size:16px; font-weight:600; color:var(--teal-deep); margin:0;}
+  .ledger-head .export{font-size:12px; font-weight:600; color:var(--gold); background:none; border:none; padding:4px 0;
+    text-decoration:underline; text-underline-offset:2px;}
+  .ledger{background:var(--white); border:1px solid var(--line); border-radius:14px; overflow:hidden;}
+  .row{display:grid; grid-template-columns:34px 1fr auto; gap:10px; align-items:center; padding:13px 14px;
+    border-bottom:1px solid var(--line); animation:rise .25s ease both;}
+  .row:last-child{border-bottom:none;}
+  @keyframes rise{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+  .row .num{font-family:'Fraunces',serif; font-weight:600; font-size:15px; color:var(--gold); text-align:right;}
+  .row .info{min-width:0;}
+  .row .name{font-size:15px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .row .meta{font-size:12.5px; color:var(--ink-soft); margin-top:2px; display:flex; gap:8px; flex-wrap:wrap;}
+  .row .meta .pass{font-family:'JetBrains Mono',monospace; color:var(--teal-deep);}
+  .row .actions{display:flex; gap:6px;}
+  .icon-btn{background:var(--paper-dim); border:none; width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; color:var(--ink-soft); padding:0;}
+  .icon-btn.danger{color:var(--rust);}
+  .icon-btn:active{background:var(--line);}
+  .empty{text-align:center; padding:40px 20px; color:var(--ink-soft);}
+  .empty p{font-size:14px; margin:0;}
+  .footer-note{text-align:center; font-size:11.5px; color:var(--ink-soft); padding:22px 20px 0;}
+
+  .toast{position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom)); transform:translate(-50%, 20px);
+    background:var(--teal-ink); color:var(--paper); font-size:13.5px; font-weight:500; padding:12px 18px; border-radius:10px;
+    opacity:0; pointer-events:none; transition:all .25s ease; z-index:50; box-shadow:0 6px 20px rgba(0,0,0,0.2);}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+  @media (prefers-reduced-motion: reduce){.row{animation:none;} .toast{transition:none;}}
+</style>
+</head>
+<body>
+
+<!-- ===================== AUTH (login / signup) ===================== -->
+<div id="view-auth" class="hidden">
+  <div class="auth-hero">
+    <div class="badge">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F7F3E8" stroke-width="2"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+    </div>
+    <h1>Bidheyseenge Dafthar</h1>
+    <p>Sign in to access the shared expatriate registry.</p>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab-btn active" id="tab-login">Log in</button>
+    <button class="tab-btn" id="tab-signup">Request access</button>
+  </div>
+
+  <div class="card" id="login-card">
+    <form id="login-form">
+      <div class="field"><label for="li-email">Email</label><input type="email" id="li-email" required autocomplete="email"></div>
+      <div class="field"><label for="li-pass">Password</label><input type="password" id="li-pass" required autocomplete="current-password"></div>
+      <div class="btn-row"><button type="submit" class="btn-primary">Log in</button></div>
+      <div class="error-msg" id="login-error"></div>
+    </form>
+  </div>
+
+  <div class="card hidden" id="signup-card">
+    <p style="font-size:13px; color:var(--ink-soft); margin:-4px 0 14px;">
+      Your request will be sent to the administrator. You'll get access once approved.
+    </p>
+    <form id="signup-form">
+      <div class="field"><label for="su-name">Your name</label><input type="text" id="su-name" required autocomplete="name"></div>
+      <div class="field"><label for="su-email">Email</label><input type="email" id="su-email" required autocomplete="email"></div>
+      <div class="field"><label for="su-pass">Password</label><input type="password" id="su-pass" required minlength="6" autocomplete="new-password"></div>
+      <div class="btn-row"><button type="submit" class="btn-primary">Request access</button></div>
+      <div class="error-msg" id="signup-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== PENDING / REJECTED ===================== -->
+<div id="view-pending" class="status-screen hidden">
+  <div class="icon-wrap" style="background:#FBF0DE;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#B08D3E" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+  </div>
+  <h2>Waiting for approval</h2>
+  <p>Your access request has been sent to the administrator. This page will update automatically once you're approved — no need to keep checking.</p>
+  <button class="btn-ghost" id="pending-signout">Sign out</button>
+</div>
+
+<div id="view-rejected" class="status-screen hidden">
+  <div class="icon-wrap" style="background:#F6E4DF;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C1553A" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>
+  </div>
+  <h2>Access not approved</h2>
+  <p>The administrator has not approved this account for access. Contact them if you believe this is a mistake.</p>
+  <button class="btn-ghost" id="rejected-signout">Sign out</button>
+</div>
+
+<!-- ===================== ADMIN ===================== -->
+<div id="view-admin" class="hidden">
+  <header>
+    <div class="head-row">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Administrator</div>
+        <h1>User approvals</h1>
+        <div class="sub" id="admin-email"></div>
+      </div>
+      <button class="signout" id="admin-signout">Sign out</button>
+    </div>
+  </header>
+  <main>
+    <div class="admin-nav">
+      <button class="active" id="nav-approvals">Approvals <span class="badge-count hidden" id="pending-badge">0</span></button>
+      <button id="nav-allusers">All users</button>
+      <button id="nav-registry">Registry</button>
+    </div>
+
+    <div id="admin-approvals-panel">
+      <div class="ledger" id="pending-list"></div>
+    </div>
+
+    <div id="admin-users-panel" class="hidden">
+      <div class="ledger" id="all-users-list"></div>
+    </div>
+
+    <div id="admin-registry-panel" class="hidden"></div>
+  </main>
+</div>
+
+<!-- ===================== MAIN REGISTRY APP (approved users) ===================== -->
+<div id="view-app" class="hidden">
+  <header>
+    <div class="head-row">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Expatriate Registry &middot; 2026</div>
+        <h1>Bidheyseenge Dafthar</h1>
+        <div class="sub" id="app-user-email"></div>
+      </div>
+      <button class="signout" id="app-signout">Sign out</button>
+    </div>
+    <div class="count-strip">
+      <div class="count-item"><span class="n" id="stat-total">0</span><span class="l">Entries</span></div>
+      <div class="count-item"><span class="n" id="stat-countries">0</span><span class="l">Countries</span></div>
+    </div>
+  </header>
+  <main id="registry-main"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Registry panel template (reused for both normal users and the admin's Registry tab) -->
+<template id="registry-template">
+  <div class="search-wrap"><input type="text" class="search-input" placeholder="Search by name, country or passport no." autocomplete="off"></div>
+  <div class="card">
+    <h2 class="card-title form-title">Add entry</h2>
+    <form class="entry-form">
+      <div class="field"><label>Full name</label><input type="text" class="f-name" placeholder="e.g. Nikhil Kuttamperoor Kuriakose" required autocomplete="off"></div>
+      <div class="field"><label>Country</label><input type="text" class="f-country" placeholder="e.g. India" required autocomplete="off"></div>
+      <div class="field"><label>Passport number</label><input type="text" class="f-passport" placeholder="e.g. N1234567" required autocomplete="off" autocapitalize="characters"></div>
+      <div class="btn-row">
+        <button type="submit" class="btn-primary submit-btn">Add entry</button>
+        <button type="button" class="btn-ghost cancel-edit hidden">Cancel</button>
+      </div>
+    </form>
+  </div>
+  <div class="ledger-head"><h2>Dafthar</h2><button class="export">Export CSV</button></div>
+  <div class="ledger ledger-list"></div>
+  <div class="footer-note">Shared registry — synced securely for all approved users.</div>
+</template>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script>
+(function(){
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const views = ['view-auth','view-pending','view-rejected','view-admin','view-app'];
+  function showView(id){
+    views.forEach(v => document.getElementById(v).classList.toggle('hidden', v !== id));
+  }
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(showToast._tm);
+    showToast._tm = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // ---------- AUTH TABS ----------
+  $('#tab-login').addEventListener('click', () => {
+    $('#tab-login').classList.add('active'); $('#tab-signup').classList.remove('active');
+    $('#login-card').classList.remove('hidden'); $('#signup-card').classList.add('hidden');
+  });
+  $('#tab-signup').addEventListener('click', () => {
+    $('#tab-signup').classList.add('active'); $('#tab-login').classList.remove('active');
+    $('#signup-card').classList.remove('hidden'); $('#login-card').classList.add('hidden');
+  });
+
+  $('#login-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const errEl = $('#login-error'); errEl.classList.remove('show');
+    try{
+      await auth.signInWithEmailAndPassword($('#li-email').value.trim(), $('#li-pass').value);
+    }catch(e){
+      errEl.textContent = friendlyAuthError(e); errEl.classList.add('show');
+    }
+  });
+
+  $('#signup-form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const errEl = $('#signup-error'); errEl.classList.remove('show');
+    const name = $('#su-name').value.trim();
+    const email = $('#su-email').value.trim();
+    const pass = $('#su-pass').value;
+    try{
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await db.collection('users').doc(cred.user.uid).set({
+        name, email, status:'pending', role:'user',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      // onAuthStateChanged will pick this up and route to the pending screen.
+    }catch(e){
+      errEl.textContent = friendlyAuthError(e); errEl.classList.add('show');
+    }
+  });
+
+  function friendlyAuthError(e){
+    const map = {
+      'auth/email-already-in-use':'That email already has an account — try logging in instead.',
+      'auth/invalid-email':'That email address looks invalid.',
+      'auth/weak-password':'Password should be at least 6 characters.',
+      'auth/wrong-password':'Incorrect password.',
+      'auth/user-not-found':'No account found with that email.',
+      'auth/invalid-credential':'Incorrect email or password.',
+      'auth/too-many-requests':'Too many attempts — please wait a moment and try again.'
+    };
+    return map[e.code] || e.message;
+  }
+
+  $('#pending-signout').addEventListener('click', () => auth.signOut());
+  $('#rejected-signout').addEventListener('click', () => auth.signOut());
+  $('#admin-signout').addEventListener('click', () => auth.signOut());
+  $('#app-signout').addEventListener('click', () => auth.signOut());
+
+  // ---------- AUTH STATE ROUTING ----------
+  let profileUnsub = null;
+  auth.onAuthStateChanged((user) => {
+    if(profileUnsub){ profileUnsub(); profileUnsub = null; }
+    teardownRegistries();
+    if(!user){
+      showView('view-auth');
+      $('#login-form').reset(); $('#signup-form').reset();
+      return;
+    }
+    profileUnsub = db.collection('users').doc(user.uid).onSnapshot((doc) => {
+      if(!doc.exists) return; // race right after signup write
+      const profile = doc.data();
+      if(profile.status === 'pending'){
+        showView('view-pending');
+      } else if(profile.status === 'rejected'){
+        showView('view-rejected');
+      } else if(profile.status === 'approved' && profile.role === 'admin'){
+        $('#admin-email').textContent = profile.email;
+        showView('view-admin');
+        setupAdmin();
+      } else if(profile.status === 'approved'){
+        $('#app-user-email').textContent = profile.email;
+        showView('view-app');
+        setupUserRegistry();
+      }
+    });
+  });
+
+  // ---------- ADMIN PANEL ----------
+  let adminUnsubs = [];
+  function teardownAdmin(){ adminUnsubs.forEach(u => u()); adminUnsubs = []; }
+
+  function setupAdmin(){
+    teardownAdmin();
+    const navApprovals = $('#nav-approvals'), navAll = $('#nav-allusers'), navRegistry = $('#nav-registry');
+    const panelApprovals = $('#admin-approvals-panel'), panelAll = $('#admin-users-panel'), panelRegistry = $('#admin-registry-panel');
+
+    function setTab(tab){
+      [navApprovals, navAll, navRegistry].forEach(b => b.classList.remove('active'));
+      [panelApprovals, panelAll, panelRegistry].forEach(p => p.classList.add('hidden'));
+      if(tab==='approvals'){ navApprovals.classList.add('active'); panelApprovals.classList.remove('hidden'); }
+      if(tab==='all'){ navAll.classList.add('active'); panelAll.classList.remove('hidden'); }
+      if(tab==='registry'){
+        navRegistry.classList.add('active'); panelRegistry.classList.remove('hidden');
+        if(!panelRegistry.dataset.mounted){
+          mountRegistry(panelRegistry, { admin:true });
+          panelRegistry.dataset.mounted = '1';
+        }
+      }
+    }
+    navApprovals.onclick = () => setTab('approvals');
+    navAll.onclick = () => setTab('all');
+    navRegistry.onclick = () => setTab('registry');
+    setTab('approvals');
+
+    const unsubAll = db.collection('users').orderBy('createdAt','desc').onSnapshot((snap) => {
+      const users = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      const pending = users.filter(u => u.status === 'pending');
+
+      const badge = $('#pending-badge');
+      if(pending.length > 0){ badge.textContent = pending.length; badge.classList.remove('hidden'); }
+      else{ badge.classList.add('hidden'); }
+
+      $('#pending-list').innerHTML = pending.length === 0
+        ? `<div class="empty"><p>No pending requests.</p></div>`
+        : pending.map(u => `
+          <div class="user-row" data-id="${u.id}">
+            <div><div class="u-name">${escapeHtml(u.name||u.email)}</div><div class="u-email">${escapeHtml(u.email)}</div></div>
+            <div class="u-actions">
+              <button class="pill-btn approve" data-action="approve">Approve</button>
+              <button class="pill-btn reject" data-action="reject">Reject</button>
+            </div>
+          </div>`).join('');
+
+      $('#all-users-list').innerHTML = users.length === 0
+        ? `<div class="empty"><p>No users yet.</p></div>`
+        : users.map(u => `
+          <div class="user-row" data-id="${u.id}">
+            <div><div class="u-name">${escapeHtml(u.name||u.email)} ${u.role==='admin' ? '&middot; admin' : ''}</div><div class="u-email">${escapeHtml(u.email)}</div></div>
+            <div class="u-actions">
+              <span class="status-tag ${u.status}">${u.status}</span>
+              ${u.role !== 'admin' ? `<button class="pill-btn reject" data-action="revoke">${u.status==='approved' ? 'Revoke' : 'Remove'}</button>` : ''}
+            </div>
+          </div>`).join('');
+    });
+    adminUnsubs.push(unsubAll);
+
+    document.body.addEventListener('click', adminActionHandler);
+    function adminActionHandler(ev){
+      const row = ev.target.closest('.user-row');
+      if(!row || !document.getElementById('view-admin').contains(row)) return;
+      const id = row.dataset.id;
+      const action = ev.target.dataset.action;
+      if(action === 'approve') db.collection('users').doc(id).update({ status:'approved' }).then(()=>showToast('User approved'));
+      if(action === 'reject') db.collection('users').doc(id).update({ status:'rejected' }).then(()=>showToast('User rejected'));
+      if(action === 'revoke'){
+        if(confirm('Remove this user\'s access? They will need to be re-approved to get back in.')){
+          db.collection('users').doc(id).update({ status:'rejected' }).then(()=>showToast('Access revoked'));
+        }
+      }
+    }
+    adminUnsubs.push(() => document.body.removeEventListener('click', adminActionHandler));
+  }
+
+  // ---------- SHARED REGISTRY (entries collection) ----------
+  let registryUnsubs = [];
+  function teardownRegistries(){
+    registryUnsubs.forEach(u => u());
+    registryUnsubs = [];
+    const rp = $('#admin-registry-panel');
+    if(rp) rp.dataset.mounted = '';
+  }
+
+  function setupUserRegistry(){
+    mountRegistry($('#registry-main'), { admin:false });
+  }
+
+  function mountRegistry(container, opts){
+    const tpl = document.getElementById('registry-template');
+    const node = tpl.content.cloneNode(true);
+    container.innerHTML = '';
+    container.appendChild(node);
+
+    const searchInput = container.querySelector('.search-input');
+    const form = container.querySelector('.entry-form');
+    const fName = container.querySelector('.f-name');
+    const fCountry = container.querySelector('.f-country');
+    const fPassport = container.querySelector('.f-passport');
+    const formTitle = container.querySelector('.form-title');
+    const submitBtn = container.querySelector('.submit-btn');
+    const cancelBtn = container.querySelector('.cancel-edit');
+    const list = container.querySelector('.ledger-list');
+    const exportBtn = container.querySelector('.export');
+
+    let entries = [];
+    let editingId = null;
+
+    function resetForm(){
+      form.reset(); editingId = null;
+      formTitle.textContent = 'Add entry'; submitBtn.textContent = 'Add entry';
+      cancelBtn.classList.add('hidden');
+    }
+    cancelBtn.addEventListener('click', resetForm);
+
+    function renderStats(){
+      const totalEl = document.getElementById('stat-total');
+      const ctrEl = document.getElementById('stat-countries');
+      if(totalEl){ totalEl.textContent = entries.length; }
+      if(ctrEl){ ctrEl.textContent = new Set(entries.map(e => (e.country||'').trim().toLowerCase()).filter(Boolean)).size; }
+    }
+
+    function render(){
+      const q = searchInput.value.trim().toLowerCase();
+      let filtered = entries;
+      if(q){
+        filtered = entries.filter(e =>
+          (e.name||'').toLowerCase().includes(q) ||
+          (e.country||'').toLowerCase().includes(q) ||
+          (e.passport||'').toLowerCase().includes(q)
+        );
+      }
+      renderStats();
+      if(entries.length === 0){
+        list.innerHTML = `<div class="empty"><p>No entries yet. Add the first one above.</p></div>`;
+        return;
+      }
+      if(filtered.length === 0){
+        list.innerHTML = `<div class="empty"><p>No matches for "${escapeHtml(q)}".</p></div>`;
+        return;
+      }
+      list.innerHTML = filtered.map((e, i) => `
+        <div class="row" data-id="${e.id}">
+          <div class="num">${String(i+1).padStart(2,'0')}</div>
+          <div class="info">
+            <div class="name">${escapeHtml(e.name)}</div>
+            <div class="meta"><span>${escapeHtml(e.country)}</span><span class="pass">${escapeHtml(e.passport)}</span></div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn edit-btn" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+            <button class="icon-btn danger del-btn" title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
+          </div>
+        </div>`).join('');
+    }
+
+    const unsub = db.collection('entries').orderBy('createdAt','asc').onSnapshot((snap) => {
+      entries = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      render();
+    }, (err) => {
+      console.error(err);
+    });
+    registryUnsubs.push(unsub);
+
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const name = fName.value.trim(), country = fCountry.value.trim(), passport = fPassport.value.trim().toUpperCase();
+      if(!name || !country || !passport) return;
+      submitBtn.disabled = true;
+      try{
+        if(editingId){
+          await db.collection('entries').doc(editingId).update({ name, country, passport });
+          showToast('Entry updated');
+        }else{
+          await db.collection('entries').add({
+            name, country, passport,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdBy: auth.currentUser ? auth.currentUser.email : null
+          });
+          showToast('Entry added');
+        }
+        resetForm();
+      }catch(e){
+        showToast('Could not save — check your connection');
+      }finally{
+        submitBtn.disabled = false;
+      }
+    });
+
+    list.addEventListener('click', async (ev) => {
+      const row = ev.target.closest('.row');
+      if(!row) return;
+      const id = row.dataset.id;
+      const entry = entries.find(e => e.id === id);
+      if(!entry) return;
+      if(ev.target.closest('.edit-btn')){
+        editingId = id;
+        fName.value = entry.name; fCountry.value = entry.country; fPassport.value = entry.passport;
+        formTitle.textContent = 'Edit entry'; submitBtn.textContent = 'Save changes';
+        cancelBtn.classList.remove('hidden');
+        fName.scrollIntoView({behavior:'smooth', block:'center'}); fName.focus();
+      }
+      if(ev.target.closest('.del-btn')){
+        if(confirm(`Remove "${entry.name}" from the dafthar?`)){
+          await db.collection('entries').doc(id).delete();
+          if(editingId === id) resetForm();
+          showToast('Entry deleted');
+        }
+      }
+    });
+
+    searchInput.addEventListener('input', render);
+
+    exportBtn.addEventListener('click', () => {
+      if(entries.length === 0){ showToast('Nothing to export yet'); return; }
+      const header = ['#','FullName','Country','PassportNumber'];
+      const rows = entries.map((e,i) => [i+1, e.name, e.country, e.passport]);
+      const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'bidheyseenge_dafthar_' + new Date().toISOString().slice(0,10) + '.csv';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      showToast('CSV exported');
+    });
+  }
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+  }
+})();
+</script>
+</body>
+</html>
