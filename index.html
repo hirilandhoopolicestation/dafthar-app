@@ -269,6 +269,14 @@
   <div class="search-wrap"><input type="text" class="search-input" placeholder="Search by name, country or passport no." autocomplete="off"></div>
   <div class="card">
     <h2 class="card-title form-title">Add entry</h2>
+    <div class="scan-row" style="margin-bottom:14px;">
+      <button type="button" class="btn-ghost scan-btn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+        Scan passport photo
+      </button>
+      <input type="file" class="scan-file-input" accept="image/*" capture="environment" style="display:none;">
+      <div class="scan-status" style="font-size:12.5px; color:var(--ink-soft); margin-top:8px; display:none;"></div>
+    </div>
     <form class="entry-form">
       <div class="field"><label>Full name</label><input type="text" class="f-name" placeholder="e.g. Nikhil Kuttamperoor Kuriakose" required autocomplete="off"></div>
       <div class="field"><label>Country</label><input type="text" class="f-country" placeholder="e.g. India" required autocomplete="off"></div>
@@ -283,7 +291,25 @@
       </div>
     </form>
   </div>
-  <div class="ledger-head"><h2>Dafthar</h2><button class="export">Export CSV</button></div>
+  <div class="ledger-head">
+    <h2>Dafthar</h2>
+    <div style="display:flex; gap:14px;">
+      <button class="import-toggle" style="font-size:12px; font-weight:600; color:var(--teal-deep); background:none; border:none; padding:4px 0; text-decoration:underline; text-underline-offset:2px;">Bulk import</button>
+      <button class="export">Export CSV</button>
+    </div>
+  </div>
+  <div class="card import-panel hidden" style="margin-bottom:14px;">
+    <h2 class="card-title">Bulk import</h2>
+    <p style="font-size:12.5px; color:var(--ink-soft); margin:-6px 0 12px;">
+      Just paste a list of names, one per line — that's all you need. (If you'd rather include Country, Passport, etc. too, paste CSV text with a header row instead: FullName,Country,PassportNumber,...)
+    </p>
+    <textarea class="import-textarea" rows="8" style="width:100%; padding:12px; border-radius:9px; border:1px solid var(--line); font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--paper); color:var(--ink);" placeholder="Jane Doe&#10;John Smith&#10;Maria Garcia"></textarea>
+    <div class="btn-row">
+      <button type="button" class="btn-primary import-run">Import entries</button>
+      <button type="button" class="btn-ghost import-cancel">Cancel</button>
+    </div>
+    <div class="import-status" style="font-size:12.5px; color:var(--ink-soft); margin-top:8px;"></div>
+  </div>
   <div class="ledger ledger-list"></div>
   <div class="footer-note">Shared registry — synced securely for all approved users.</div>
 </template>
@@ -291,6 +317,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="firebase-config.js"></script>
 <script>
 function bootFail(detail){
@@ -661,6 +688,191 @@ try{
 
     searchInput.addEventListener('input', render);
 
+    const scanBtn = container.querySelector('.scan-btn');
+    const scanFileInput = container.querySelector('.scan-file-input');
+    const scanStatus = container.querySelector('.scan-status');
+
+    scanBtn.addEventListener('click', () => scanFileInput.click());
+
+    scanFileInput.addEventListener('change', async () => {
+      const file = scanFileInput.files[0];
+      if(!file) return;
+      scanStatus.style.display = 'block';
+      scanStatus.textContent = 'Reading passport photo… this can take up to 30 seconds.';
+      scanBtn.disabled = true;
+      try{
+        const result = await Tesseract.recognize(file, 'eng');
+        const text = result.data.text || '';
+        const parsed = parsePassportMRZ(text);
+        if(!parsed){
+          scanStatus.textContent = "Couldn't read the passport clearly. Try a clearer, well-lit, straight-on photo of the main ID page — or just enter details manually below.";
+        }else{
+          if(parsed.name) fName.value = parsed.name;
+          if(parsed.country) fCountry.value = parsed.country;
+          if(parsed.passport) fPassport.value = parsed.passport;
+          scanStatus.textContent = 'Filled in from scan — please double check the fields below before saving, OCR is not always perfect.';
+          fName.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+      }catch(e){
+        scanStatus.textContent = 'Could not process that photo. Please try again or enter details manually.';
+      }finally{
+        scanBtn.disabled = false;
+        scanFileInput.value = '';
+      }
+    });
+
+    const COUNTRY_CODES = {
+      IND:'India', BGD:'Bangladesh', NPL:'Nepal', LKA:'Sri Lanka', PAK:'Pakistan',
+      PHL:'Philippines', IDN:'Indonesia', THA:'Thailand', MMR:'Myanmar', VNM:'Vietnam',
+      CHN:'China', NGA:'Nigeria', KEN:'Kenya', EGY:'Egypt', ETH:'Ethiopia',
+      GBR:'United Kingdom', USA:'United States', CAN:'Canada', AUS:'Australia',
+      DEU:'Germany', FRA:'France', ITA:'Italy', ESP:'Spain', RUS:'Russia',
+      MDV:'Maldives', ARE:'United Arab Emirates', SAU:'Saudi Arabia', TUR:'Turkey',
+      MYS:'Malaysia', SGP:'Singapore', JPN:'Japan', KOR:'South Korea', BRA:'Brazil',
+      MEX:'Mexico', ZAF:'South Africa', NPA:'Nepal'
+    };
+
+    function parsePassportMRZ(rawText){
+      // Normalize: uppercase, keep only characters valid in an MRZ line
+      const lines = rawText.split(/\r?\n/)
+        .map(l => l.toUpperCase().replace(/[^A-Z0-9<]/g,''))
+        .filter(l => l.length >= 30); // MRZ lines are ~44 chars; OCR often drops a few
+
+      // Find a line-1 candidate: starts with P<, or has <<  pattern typical of names
+      let line1 = lines.find(l => /^P[A-Z<]/.test(l) && l.includes('<<'));
+      // Find a line-2 candidate: comes after line1 in the array, alphanumeric+<, has digits
+      let line2Index = line1 ? lines.indexOf(line1) + 1 : -1;
+      let line2 = line2Index > -1 ? lines[line2Index] : lines.find(l => /^[A-Z0-9<]{9}[0-9<][A-Z]{3}[0-9]{6}/.test(l));
+
+      if(!line1 && !line2) return null;
+
+      let name = null, country = null, passport = null;
+
+      if(line1){
+        const m = line1.match(/^P<([A-Z]{3})([A-Z<]+)$/) || line1.match(/^P[A-Z]?([A-Z]{3})([A-Z<]+)$/);
+        if(m){
+          const countryCode = m[1];
+          country = COUNTRY_CODES[countryCode] || null;
+          const nameParts = m[2].split('<<').filter(Boolean);
+          if(nameParts.length >= 2){
+            const surname = nameParts[0].replace(/</g,' ').trim();
+            const given = nameParts.slice(1).join(' ').replace(/</g,' ').trim();
+            name = [given, surname].filter(Boolean).join(' ').replace(/\s+/g,' ').trim();
+          }else if(nameParts.length === 1){
+            name = nameParts[0].replace(/</g,' ').trim();
+          }
+        }
+      }
+
+      if(line2){
+        const m2 = line2.match(/^([A-Z0-9<]{9})[0-9<]([A-Z]{3})/);
+        if(m2){
+          passport = m2[1].replace(/</g,'').trim();
+          if(!country){ country = COUNTRY_CODES[m2[2]] || null; }
+        }
+      }
+
+      if(!name && !passport) return null;
+      return { name, country, passport };
+    }
+
+    const importToggle = container.querySelector('.import-toggle');
+    const importPanel = container.querySelector('.import-panel');
+    const importTextarea = container.querySelector('.import-textarea');
+    const importRunBtn = container.querySelector('.import-run');
+    const importCancelBtn = container.querySelector('.import-cancel');
+    const importStatus = container.querySelector('.import-status');
+
+    importToggle.addEventListener('click', () => importPanel.classList.toggle('hidden'));
+    importCancelBtn.addEventListener('click', () => {
+      importPanel.classList.add('hidden');
+      importTextarea.value = '';
+      importStatus.textContent = '';
+    });
+
+    function parseCsvLine(line){
+      const out = [];
+      let cur = '', inQuotes = false;
+      for(let i=0; i<line.length; i++){
+        const c = line[i];
+        if(inQuotes){
+          if(c === '"'){
+            if(line[i+1] === '"'){ cur += '"'; i++; } else { inQuotes = false; }
+          } else { cur += c; }
+        }else{
+          if(c === '"'){ inQuotes = true; }
+          else if(c === ','){ out.push(cur); cur = ''; }
+          else { cur += c; }
+        }
+      }
+      out.push(cur);
+      return out.map(s => s.trim());
+    }
+
+    importRunBtn.addEventListener('click', async () => {
+      const raw = importTextarea.value.trim();
+      if(!raw){ importStatus.textContent = 'Paste some names first.'; return; }
+      const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
+
+      // Try to detect a real CSV header (FullName/Name column). If not found,
+      // treat every line as a plain name — no header, no commas needed.
+      const firstLineCols = parseCsvLine(lines[0]).map(h => h.toLowerCase().replace(/[^a-z]/g,''));
+      const colIndex = (names) => {
+        for(const n of names){ const idx = firstLineCols.indexOf(n); if(idx > -1) return idx; }
+        return -1;
+      };
+      const hasNameHeader = colIndex(['fullname','name']) > -1;
+
+      let idxName, idxCountry=-1, idxPassport=-1, idxOccupation=-1, idxEmployer=-1, idxPhone=-1, idxArrival=-1;
+      let dataLines;
+
+      if(hasNameHeader){
+        idxName = colIndex(['fullname','name']);
+        idxCountry = colIndex(['country']);
+        idxPassport = colIndex(['passportnumber','passport']);
+        idxOccupation = colIndex(['occupation','jobtitle']);
+        idxEmployer = colIndex(['employer','sponsor']);
+        idxPhone = colIndex(['phone','phonenumber']);
+        idxArrival = colIndex(['arrivaldate','dateofarrival']);
+        dataLines = lines.slice(1);
+      }else{
+        // Plain list mode: every line is just a name (commas allowed as part of the name are fine too).
+        idxName = 0;
+        dataLines = lines;
+      }
+
+      if(dataLines.length === 0){ importStatus.textContent = 'No names found to import.'; return; }
+
+      importRunBtn.disabled = true;
+      let added = 0, skipped = 0;
+      for(let i=0; i<dataLines.length; i++){
+        const line = dataLines[i];
+        const cols = hasNameHeader ? parseCsvLine(line) : [line.replace(/^["']|["']$/g,'')];
+        const name = (cols[idxName] || '').trim();
+        if(!name){ skipped++; continue; }
+        const entry = {
+          name,
+          country: idxCountry > -1 ? (cols[idxCountry] || '').trim() : '',
+          passport: idxPassport > -1 ? (cols[idxPassport] || '').trim().toUpperCase() : '',
+          occupation: idxOccupation > -1 ? (cols[idxOccupation] || '').trim() : '',
+          employer: idxEmployer > -1 ? (cols[idxEmployer] || '').trim() : '',
+          phone: idxPhone > -1 ? (cols[idxPhone] || '').trim() : '',
+          arrivalDate: idxArrival > -1 ? (cols[idxArrival] || '').trim() : '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          createdBy: auth.currentUser ? auth.currentUser.email : null
+        };
+        try{
+          await db.collection('entries').add(entry);
+          added++;
+        }catch(e){ skipped++; }
+        importStatus.textContent = `Importing… ${added} added so far.`;
+      }
+      importRunBtn.disabled = false;
+      importStatus.textContent = `Done — ${added} entries added${skipped ? `, ${skipped} skipped` : ''}.`;
+      importTextarea.value = '';
+      showToast(`${added} entries imported`);
+    });
+
     exportBtn.addEventListener('click', () => {
       if(entries.length === 0){ showToast('Nothing to export yet'); return; }
       const header = ['#','FullName','Country','PassportNumber','Occupation','Employer','Phone','ArrivalDate'];
@@ -685,4 +897,3 @@ try{
 </script>
 </body>
 </html>
-
