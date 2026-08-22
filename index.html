@@ -273,6 +273,10 @@
       <div class="field"><label>Full name</label><input type="text" class="f-name" placeholder="e.g. Nikhil Kuttamperoor Kuriakose" required autocomplete="off"></div>
       <div class="field"><label>Country</label><input type="text" class="f-country" placeholder="e.g. India" required autocomplete="off"></div>
       <div class="field"><label>Passport number</label><input type="text" class="f-passport" placeholder="e.g. N1234567" required autocomplete="off" autocapitalize="characters"></div>
+      <div class="field"><label>Job title / Occupation</label><input type="text" class="f-occupation" placeholder="e.g. Carpenter" autocomplete="off"></div>
+      <div class="field"><label>Employer / Sponsor</label><input type="text" class="f-employer" placeholder="e.g. Reef & Ridge Construction" autocomplete="off"></div>
+      <div class="field"><label>Phone number</label><input type="tel" class="f-phone" placeholder="e.g. 7712345" autocomplete="off"></div>
+      <div class="field"><label>Date of arrival</label><input type="date" class="f-arrival" autocomplete="off"></div>
       <div class="btn-row">
         <button type="submit" class="btn-primary submit-btn">Add entry</button>
         <button type="button" class="btn-ghost cancel-edit hidden">Cancel</button>
@@ -520,6 +524,10 @@ try{
     const fName = container.querySelector('.f-name');
     const fCountry = container.querySelector('.f-country');
     const fPassport = container.querySelector('.f-passport');
+    const fOccupation = container.querySelector('.f-occupation');
+    const fEmployer = container.querySelector('.f-employer');
+    const fPhone = container.querySelector('.f-phone');
+    const fArrival = container.querySelector('.f-arrival');
     const formTitle = container.querySelector('.form-title');
     const submitBtn = container.querySelector('.submit-btn');
     const cancelBtn = container.querySelector('.cancel-edit');
@@ -550,7 +558,10 @@ try{
         filtered = entries.filter(e =>
           (e.name||'').toLowerCase().includes(q) ||
           (e.country||'').toLowerCase().includes(q) ||
-          (e.passport||'').toLowerCase().includes(q)
+          (e.passport||'').toLowerCase().includes(q) ||
+          (e.occupation||'').toLowerCase().includes(q) ||
+          (e.employer||'').toLowerCase().includes(q) ||
+          (e.phone||'').toLowerCase().includes(q)
         );
       }
       renderStats();
@@ -567,13 +578,24 @@ try{
           <div class="num">${String(i+1).padStart(2,'0')}</div>
           <div class="info">
             <div class="name">${escapeHtml(e.name)}</div>
-            <div class="meta"><span>${escapeHtml(e.country)}</span><span class="pass">${escapeHtml(e.passport)}</span></div>
+            <div class="meta">
+              <span>${escapeHtml(e.country)}</span><span class="pass">${escapeHtml(e.passport)}</span>
+              ${e.occupation ? `<span>${escapeHtml(e.occupation)}</span>` : ''}
+              ${e.employer ? `<span>${escapeHtml(e.employer)}</span>` : ''}
+              ${e.phone ? `<span>${escapeHtml(e.phone)}</span>` : ''}
+              ${e.arrivalDate ? `<span>Arrived ${escapeHtml(formatDate(e.arrivalDate))}</span>` : ''}
+            </div>
           </div>
           <div class="actions">
             <button class="icon-btn edit-btn" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
             <button class="icon-btn danger del-btn" title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
           </div>
         </div>`).join('');
+    }
+    function formatDate(iso){
+      const d = new Date(iso + 'T00:00:00');
+      if(isNaN(d)) return iso;
+      return d.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
     }
 
     const unsub = db.collection('entries').orderBy('createdAt','asc').onSnapshot((snap) => {
@@ -587,15 +609,19 @@ try{
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const name = fName.value.trim(), country = fCountry.value.trim(), passport = fPassport.value.trim().toUpperCase();
+      const occupation = fOccupation.value.trim();
+      const employer = fEmployer.value.trim();
+      const phone = fPhone.value.trim();
+      const arrivalDate = fArrival.value; // already YYYY-MM-DD or ''
       if(!name || !country || !passport) return;
       submitBtn.disabled = true;
       try{
         if(editingId){
-          await db.collection('entries').doc(editingId).update({ name, country, passport });
+          await db.collection('entries').doc(editingId).update({ name, country, passport, occupation, employer, phone, arrivalDate });
           showToast('Entry updated');
         }else{
           await db.collection('entries').add({
-            name, country, passport,
+            name, country, passport, occupation, employer, phone, arrivalDate,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             createdBy: auth.currentUser ? auth.currentUser.email : null
           });
@@ -618,6 +644,8 @@ try{
       if(ev.target.closest('.edit-btn')){
         editingId = id;
         fName.value = entry.name; fCountry.value = entry.country; fPassport.value = entry.passport;
+        fOccupation.value = entry.occupation || ''; fEmployer.value = entry.employer || '';
+        fPhone.value = entry.phone || ''; fArrival.value = entry.arrivalDate || '';
         formTitle.textContent = 'Edit entry'; submitBtn.textContent = 'Save changes';
         cancelBtn.classList.remove('hidden');
         fName.scrollIntoView({behavior:'smooth', block:'center'}); fName.focus();
@@ -635,8 +663,8 @@ try{
 
     exportBtn.addEventListener('click', () => {
       if(entries.length === 0){ showToast('Nothing to export yet'); return; }
-      const header = ['#','FullName','Country','PassportNumber'];
-      const rows = entries.map((e,i) => [i+1, e.name, e.country, e.passport]);
+      const header = ['#','FullName','Country','PassportNumber','Occupation','Employer','Phone','ArrivalDate'];
+      const rows = entries.map((e,i) => [i+1, e.name, e.country, e.passport, e.occupation||'', e.employer||'', e.phone||'', e.arrivalDate||'']);
       const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
@@ -657,3 +685,4 @@ try{
 </script>
 </body>
 </html>
+
