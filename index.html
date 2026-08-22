@@ -134,9 +134,26 @@
     opacity:0; pointer-events:none; transition:all .25s ease; z-index:50; box-shadow:0 6px 20px rgba(0,0,0,0.2);}
   .toast.show{opacity:1; transform:translate(-50%,0);}
   @media (prefers-reduced-motion: reduce){.row{animation:none;} .toast{transition:none;}}
+
+  #boot-loading{display:flex; align-items:center; justify-content:center; min-height:100vh; color:var(--ink-soft); font-size:14px;}
+  #boot-error{display:none; max-width:480px; margin:60px auto; padding:0 20px;}
+  #boot-error .card{border-color:#E8B9A8;}
+  #boot-error h2{font-family:'Fraunces',serif; color:var(--rust); font-size:18px; margin:0 0 10px;}
+  #boot-error p{font-size:13.5px; color:var(--ink-soft); line-height:1.5; margin:0 0 12px;}
+  #boot-error pre{background:var(--paper-dim); padding:12px; border-radius:8px; font-size:11.5px;
+    white-space:pre-wrap; word-break:break-word; color:var(--rust); margin:0;}
 </style>
 </head>
 <body>
+
+<div id="boot-loading">Loading…</div>
+<div id="boot-error">
+  <div class="card">
+    <h2>Something went wrong loading the app</h2>
+    <p>Please screenshot this and send it back so it can be fixed. Common causes: <code>firebase-config.js</code> still has placeholder values, or the domain isn't in Firebase's Authorized domains list.</p>
+    <pre id="boot-error-detail"></pre>
+  </div>
+</div>
 
 <!-- ===================== AUTH (login / signup) ===================== -->
 <div id="view-auth" class="hidden">
@@ -272,10 +289,35 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
+function bootFail(detail){
+  document.getElementById('boot-loading').style.display = 'none';
+  document.getElementById('boot-error').style.display = 'block';
+  document.getElementById('boot-error-detail').textContent = detail;
+  console.error('[Dafthar boot error]', detail);
+}
+window.addEventListener('error', (ev) => {
+  bootFail((ev.error && ev.error.message) || ev.message || 'Unknown script error');
+});
 (function(){
+try{
+  if(typeof firebase === 'undefined'){
+    bootFail('The Firebase SDK did not load. Check your internet connection, or that the <script> tags for firebase-app-compat.js etc. in index.html were uploaded correctly.');
+    return;
+  }
+  if(typeof firebaseConfig === 'undefined'){
+    bootFail('firebase-config.js did not load or is missing. Make sure that file was uploaded alongside index.html.');
+    return;
+  }
+  const stillPlaceholder = Object.values(firebaseConfig).some(v => String(v).includes('PASTE_'));
+  if(stillPlaceholder){
+    bootFail('firebase-config.js still has placeholder values (PASTE_API_KEY_HERE etc). Open firebase-config.js and replace them with your real Firebase project config (Firebase Console -> Project settings -> Your apps).');
+    return;
+  }
+
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
+  document.getElementById('boot-loading').style.display = 'none';
 
   const $ = (sel, root=document) => root.querySelector(sel);
   const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
@@ -373,6 +415,8 @@
         showView('view-app');
         setupUserRegistry();
       }
+    }, (err) => {
+      bootFail('Could not read your user profile from Firestore: ' + err.message + '\n\nThis usually means the security rules from firestore.rules were not pasted/published correctly in Firebase Console -> Firestore Database -> Rules.');
     });
   });
 
@@ -606,6 +650,9 @@
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
   }
+}catch(e){
+  bootFail(e.message + (e.stack ? ('\n\n' + e.stack) : ''));
+}
 })();
 </script>
 </body>
