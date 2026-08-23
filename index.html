@@ -777,6 +777,10 @@ try{
     }
 
     const importToggle = container.querySelector('.import-toggle');
+    const importWrap = importToggle.parentElement; // the flex row holding Bulk import + Export
+    if(!opts.admin){
+      importToggle.remove();
+    }
     const importPanel = container.querySelector('.import-panel');
     const importTextarea = container.querySelector('.import-textarea');
     const importRunBtn = container.querySelector('.import-run');
