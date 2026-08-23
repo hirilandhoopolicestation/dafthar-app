@@ -270,11 +270,18 @@
   <div class="card">
     <h2 class="card-title form-title">Add entry</h2>
     <div class="scan-row" style="margin-bottom:14px;">
-      <button type="button" class="btn-ghost scan-btn" style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-        Scan passport photo
-      </button>
-      <input type="file" class="scan-file-input" accept="image/*" capture="environment" style="display:none;">
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn-ghost scan-camera-btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+          Take photo
+        </button>
+        <button type="button" class="btn-ghost scan-upload-btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          Upload from file
+        </button>
+      </div>
+      <input type="file" class="scan-camera-input" accept="image/*" capture="environment" style="display:none;">
+      <input type="file" class="scan-upload-input" accept="image/*" style="display:none;">
       <div class="scan-status" style="font-size:12.5px; color:var(--ink-soft); margin-top:8px; display:none;"></div>
     </div>
     <form class="entry-form">
@@ -688,18 +695,23 @@ try{
 
     searchInput.addEventListener('input', render);
 
-    const scanBtn = container.querySelector('.scan-btn');
-    const scanFileInput = container.querySelector('.scan-file-input');
+    const scanCameraBtn = container.querySelector('.scan-camera-btn');
+    const scanUploadBtn = container.querySelector('.scan-upload-btn');
+    const scanCameraInput = container.querySelector('.scan-camera-input');
+    const scanUploadInput = container.querySelector('.scan-upload-input');
     const scanStatus = container.querySelector('.scan-status');
 
-    scanBtn.addEventListener('click', () => scanFileInput.click());
+    scanCameraBtn.addEventListener('click', () => scanCameraInput.click());
+    scanUploadBtn.addEventListener('click', () => scanUploadInput.click());
+    scanCameraInput.addEventListener('change', () => processPassportFile(scanCameraInput));
+    scanUploadInput.addEventListener('change', () => processPassportFile(scanUploadInput));
 
-    scanFileInput.addEventListener('change', async () => {
-      const file = scanFileInput.files[0];
+    async function processPassportFile(inputEl){
+      const file = inputEl.files[0];
       if(!file) return;
       scanStatus.style.display = 'block';
       scanStatus.textContent = 'Reading passport photo… this can take up to 30 seconds.';
-      scanBtn.disabled = true;
+      scanCameraBtn.disabled = true; scanUploadBtn.disabled = true;
       try{
         const result = await Tesseract.recognize(file, 'eng');
         const text = result.data.text || '';
@@ -716,10 +728,10 @@ try{
       }catch(e){
         scanStatus.textContent = 'Could not process that photo. Please try again or enter details manually.';
       }finally{
-        scanBtn.disabled = false;
-        scanFileInput.value = '';
+        scanCameraBtn.disabled = false; scanUploadBtn.disabled = false;
+        inputEl.value = '';
       }
-    });
+    }
 
     const COUNTRY_CODES = {
       IND:'India', BGD:'Bangladesh', NPL:'Nepal', LKA:'Sri Lanka', PAK:'Pakistan',
