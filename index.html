@@ -47,6 +47,7 @@
   .card{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:20px;
     margin-bottom:18px; box-shadow:0 1px 2px rgba(15,30,25,0.04);}
   .card-title{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin:0 0 14px; color:var(--teal-deep);}
+  .section-sub{font-size:12.5px; color:var(--ink-soft); margin-top:-12px; margin-bottom:4px;}
   .field{margin-bottom:12px;}
   .field label{display:block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
     color:var(--ink-soft); margin-bottom:6px;}
@@ -319,37 +320,52 @@
   </div>
 
   <div class="search-wrap"><input type="text" class="search-input" placeholder="Search by name, country or passport no." autocomplete="off"></div>
-  <div class="card">
-    <h2 class="card-title form-title">Add entry</h2>
-    <div class="scan-row" style="margin-bottom:14px;">
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="btn-ghost scan-camera-btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-          Take photo
-        </button>
-        <button type="button" class="btn-ghost scan-upload-btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
-          Upload from file
-        </button>
+  <form class="entry-form">
+    <div class="card">
+      <h2 class="card-title">Expatriate's Information</h2>
+      <div class="section-sub">ބިދޭސީންގެ މަޢުލޫމާތު</div>
+      <div class="editing-badge hidden" style="font-size:11.5px; font-weight:600; color:var(--gold); background:#FBF0DE; display:inline-block; padding:4px 10px; border-radius:20px; margin-top:8px;">Editing existing entry</div>
+      <div class="scan-row" style="margin:14px 0;">
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn-ghost scan-camera-btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+            Take photo
+          </button>
+          <button type="button" class="btn-ghost scan-upload-btn" style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; font-size:13.5px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+            Upload from file
+          </button>
+        </div>
+        <div style="font-size:11.5px; color:var(--ink-soft); margin-top:6px;">Scan the passport photo page to auto-fill the fields below.</div>
+        <input type="file" class="scan-camera-input" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" class="scan-upload-input" accept="image/*" style="display:none;">
+        <div class="scan-status" style="font-size:12.5px; color:var(--ink-soft); margin-top:8px; display:none;"></div>
       </div>
-      <input type="file" class="scan-camera-input" accept="image/*" capture="environment" style="display:none;">
-      <input type="file" class="scan-upload-input" accept="image/*" style="display:none;">
-      <div class="scan-status" style="font-size:12.5px; color:var(--ink-soft); margin-top:8px; display:none;"></div>
+
+      <div class="field"><label>Full name</label><input type="text" class="f-expat-name" placeholder="e.g. Nikhil Kuttamperoor Kuriakose" required autocomplete="off"></div>
+      <div class="field"><label>Country</label><input type="text" class="f-expat-country" placeholder="e.g. India" required autocomplete="off"></div>
+      <div class="field"><label>Passport number</label><input type="text" class="f-expat-passport" placeholder="e.g. N1234567" required autocomplete="off" autocapitalize="characters"></div>
+      <div class="field"><label>Work permit number</label><input type="text" class="f-expat-workpermit" placeholder="e.g. WP123456" autocomplete="off"></div>
+      <div class="field"><label>Current address</label><input type="text" class="f-expat-address" placeholder="e.g. H. Sunshine, Male'" autocomplete="off"></div>
     </div>
-    <form class="entry-form">
-      <div class="field"><label>Full name</label><input type="text" class="f-name" placeholder="e.g. Nikhil Kuttamperoor Kuriakose" required autocomplete="off"></div>
-      <div class="field"><label>Country</label><input type="text" class="f-country" placeholder="e.g. India" required autocomplete="off"></div>
-      <div class="field"><label>Passport number</label><input type="text" class="f-passport" placeholder="e.g. N1234567" required autocomplete="off" autocapitalize="characters"></div>
-      <div class="field"><label>Job title / Occupation</label><input type="text" class="f-occupation" placeholder="e.g. Carpenter" autocomplete="off"></div>
-      <div class="field"><label>Employer / Sponsor</label><input type="text" class="f-employer" placeholder="e.g. Reef & Ridge Construction" autocomplete="off"></div>
-      <div class="field"><label>Phone number</label><input type="tel" class="f-phone" placeholder="e.g. 7712345" autocomplete="off"></div>
-      <div class="field"><label>Date of arrival</label><input type="date" class="f-arrival" autocomplete="off"></div>
+
+    <div class="card">
+      <h2 class="card-title">Information of the person in charge of the expatriate</h2>
+      <div class="section-sub">ބިދޭސީންނާ ޙަވާލުވެގެންވާ ފަރާތުގެ މަޢުލޫމާތު</div>
+      <div style="height:12px;"></div>
+      <div class="field"><label>Full name</label><input type="text" class="f-sup-name" placeholder="e.g. Ahmed Shifau" autocomplete="off"></div>
+      <div class="field"><label>ID number</label><input type="text" class="f-sup-id" placeholder="e.g. A123456" autocomplete="off"></div>
+      <div class="field"><label>Permanent address</label><input type="text" class="f-sup-permanent-address" placeholder="e.g. Hirilandhoo, Thaa Atoll" autocomplete="off"></div>
+      <div class="field"><label>Current address</label><input type="text" class="f-sup-current-address" placeholder="e.g. H. Sunshine, Male'" autocomplete="off"></div>
+      <div class="field"><label>Contact number</label><input type="tel" class="f-sup-contact" placeholder="e.g. 7712345" autocomplete="off"></div>
+
       <div class="btn-row">
         <button type="submit" class="btn-primary submit-btn">Add entry</button>
         <button type="button" class="btn-ghost cancel-edit hidden">Cancel</button>
       </div>
-    </form>
-  </div>
+      <div class="save-status" style="font-size:12.5px; color:var(--ink-soft); margin-top:8px;"></div>
+    </div>
+  </form>
   <div class="ledger-head">
     <h2>Dafthar</h2>
     <div style="display:flex; gap:14px; align-items:center;">
@@ -626,18 +642,37 @@ try{
     const heroRecentList = container.querySelector('.hero-recent-list');
     if(heroName) heroName.textContent = (opts.displayName || 'there').split(' ')[0];
     const form = container.querySelector('.entry-form');
-    const fName = container.querySelector('.f-name');
-    const fCountry = container.querySelector('.f-country');
-    const fPassport = container.querySelector('.f-passport');
-    const fOccupation = container.querySelector('.f-occupation');
-    const fEmployer = container.querySelector('.f-employer');
-    const fPhone = container.querySelector('.f-phone');
-    const fArrival = container.querySelector('.f-arrival');
-    const formTitle = container.querySelector('.form-title');
+    const fExpatName = container.querySelector('.f-expat-name');
+    const fExpatCountry = container.querySelector('.f-expat-country');
+    const fExpatPassport = container.querySelector('.f-expat-passport');
+    const fExpatWorkPermit = container.querySelector('.f-expat-workpermit');
+    const fExpatAddress = container.querySelector('.f-expat-address');
+    const fSupName = container.querySelector('.f-sup-name');
+    const fSupId = container.querySelector('.f-sup-id');
+    const fSupPermanentAddress = container.querySelector('.f-sup-permanent-address');
+    const fSupCurrentAddress = container.querySelector('.f-sup-current-address');
+    const fSupContact = container.querySelector('.f-sup-contact');
+    const editingBadge = container.querySelector('.editing-badge');
     const submitBtn = container.querySelector('.submit-btn');
     const cancelBtn = container.querySelector('.cancel-edit');
+    const saveStatus = container.querySelector('.save-status');
     const list = container.querySelector('.ledger-list');
     const exportBtn = container.querySelector('.export');
+
+    if(!opts.admin){
+      const heroRecentEl = container.querySelector('.hero-recent');
+      const searchWrapEl = container.querySelector('.search-wrap');
+      const ledgerHeadEl = container.querySelector('.ledger-head');
+      const deleteAllPanelEl = container.querySelector('.delete-all-panel');
+      const importPanelEl = container.querySelector('.import-panel');
+
+      if(searchWrapEl) searchWrapEl.remove();
+      if(ledgerHeadEl) ledgerHeadEl.remove();
+      if(deleteAllPanelEl) deleteAllPanelEl.remove();
+      if(importPanelEl) importPanelEl.remove();
+      if(list) list.remove(); // full entry list stays populated in memory for internal logic, just not shown
+      if(heroRecentEl && form) form.after(heroRecentEl);
+    }
 
     const fab = document.createElement('button');
     fab.className = 'fab-new-entry';
@@ -645,7 +680,7 @@ try{
     fab.addEventListener('click', () => {
       resetForm();
       form.scrollIntoView({behavior:'smooth', block:'start'});
-      setTimeout(() => fName.focus(), 350);
+      setTimeout(() => fExpatName.focus(), 350);
     });
     container.appendChild(fab);
 
@@ -654,8 +689,10 @@ try{
 
     function resetForm(){
       form.reset(); editingId = null;
-      formTitle.textContent = 'Add entry'; submitBtn.textContent = 'Add entry';
+      submitBtn.textContent = 'Add entry';
       cancelBtn.classList.add('hidden');
+      editingBadge.classList.add('hidden');
+      saveStatus.textContent = '';
     }
     cancelBtn.addEventListener('click', resetForm);
 
@@ -663,9 +700,9 @@ try{
       const totalEl = document.getElementById('stat-total');
       const ctrEl = document.getElementById('stat-countries');
       if(totalEl){ totalEl.textContent = entries.length; }
-      if(ctrEl){ ctrEl.textContent = new Set(entries.map(e => (e.country||'').trim().toLowerCase()).filter(Boolean)).size; }
+      if(ctrEl){ ctrEl.textContent = new Set(entries.map(e => (e.expatCountry||'').trim().toLowerCase()).filter(Boolean)).size; }
       if(heroStatTotal){ heroStatTotal.textContent = entries.length; }
-      if(heroStatCountries){ heroStatCountries.textContent = new Set(entries.map(e => (e.country||'').trim().toLowerCase()).filter(Boolean)).size; }
+      if(heroStatCountries){ heroStatCountries.textContent = new Set(entries.map(e => (e.expatCountry||'').trim().toLowerCase()).filter(Boolean)).size; }
     }
 
     function initials(name){
@@ -687,6 +724,10 @@ try{
       return `${days} d ago`;
     }
 
+    function avatarHTML(e){
+      return escapeHtml(initials(e.expatName));
+    }
+
     function renderHeroRecent(){
       if(!heroRecentList) return;
       const recent = entries.slice(-5).reverse();
@@ -696,12 +737,12 @@ try{
       }
       heroRecentList.innerHTML = recent.map(e => `
         <div class="hero-recent-row" data-id="${e.id}">
-          <div class="hero-avatar">${escapeHtml(initials(e.name))}</div>
+          <div class="hero-avatar">${avatarHTML(e)}</div>
           <div class="hero-recent-info">
-            <div class="hn">${escapeHtml(e.name)}</div>
+            <div class="hn">${escapeHtml(e.expatName)}</div>
             <div class="ht"><span class="live-dot"></span>${escapeHtml(relativeTime(e.createdAt))}</div>
           </div>
-          <button class="hero-recent-view" data-view-id="${e.id}">View
+          <button class="hero-recent-view" data-view-id="${e.id}">${opts.admin ? 'View' : 'Edit'}
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>`).join('');
@@ -712,12 +753,13 @@ try{
       let filtered = entries;
       if(q){
         filtered = entries.filter(e =>
-          (e.name||'').toLowerCase().includes(q) ||
-          (e.country||'').toLowerCase().includes(q) ||
-          (e.passport||'').toLowerCase().includes(q) ||
-          (e.occupation||'').toLowerCase().includes(q) ||
-          (e.employer||'').toLowerCase().includes(q) ||
-          (e.phone||'').toLowerCase().includes(q)
+          (e.expatName||'').toLowerCase().includes(q) ||
+          (e.expatCountry||'').toLowerCase().includes(q) ||
+          (e.expatPassport||'').toLowerCase().includes(q) ||
+          (e.expatWorkPermit||'').toLowerCase().includes(q) ||
+          (e.expatAddress||'').toLowerCase().includes(q) ||
+          (e.supName||'').toLowerCase().includes(q) ||
+          (e.supContact||'').toLowerCase().includes(q)
         );
       }
       renderStats();
@@ -734,14 +776,13 @@ try{
         <div class="row" data-id="${e.id}">
           <div class="num">${String(i+1).padStart(2,'0')}</div>
           <div class="info">
-            <div class="name">${escapeHtml(e.name)}</div>
+            <div class="name">${escapeHtml(e.expatName)}</div>
             <div class="meta">
-              <span>${escapeHtml(e.country)}</span><span class="pass">${escapeHtml(e.passport)}</span>
-              ${e.occupation ? `<span>${escapeHtml(e.occupation)}</span>` : ''}
-              ${e.employer ? `<span>${escapeHtml(e.employer)}</span>` : ''}
-              ${e.phone ? `<span>${escapeHtml(e.phone)}</span>` : ''}
-              ${e.arrivalDate ? `<span>Arrived ${escapeHtml(formatDate(e.arrivalDate))}</span>` : ''}
+              <span>${escapeHtml(e.expatCountry||'')}</span><span class="pass">${escapeHtml(e.expatPassport||'')}</span>
+              ${e.expatWorkPermit ? `<span>WP ${escapeHtml(e.expatWorkPermit)}</span>` : ''}
+              ${e.expatAddress ? `<span>${escapeHtml(e.expatAddress)}</span>` : ''}
             </div>
+            ${e.supName ? `<div class="meta" style="margin-top:3px;"><span style="color:var(--gold);">Supervisor: ${escapeHtml(e.supName)}</span>${e.supContact ? `<span>${escapeHtml(e.supContact)}</span>` : ''}</div>` : ''}
           </div>
           <div class="actions">
             <button class="icon-btn edit-btn" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
@@ -765,46 +806,80 @@ try{
 
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const name = fName.value.trim(), country = fCountry.value.trim(), passport = fPassport.value.trim().toUpperCase();
-      const occupation = fOccupation.value.trim();
-      const employer = fEmployer.value.trim();
-      const phone = fPhone.value.trim();
-      const arrivalDate = fArrival.value; // already YYYY-MM-DD or ''
-      if(!name || !country || !passport) return;
+      const expatName = fExpatName.value.trim();
+      const expatCountry = fExpatCountry.value.trim();
+      const expatPassport = fExpatPassport.value.trim().toUpperCase();
+      const expatWorkPermit = fExpatWorkPermit.value.trim();
+      const expatAddress = fExpatAddress.value.trim();
+      const supName = fSupName.value.trim();
+      const supId = fSupId.value.trim();
+      const supPermanentAddress = fSupPermanentAddress.value.trim();
+      const supCurrentAddress = fSupCurrentAddress.value.trim();
+      const supContact = fSupContact.value.trim();
+      if(!expatName || !expatCountry || !expatPassport) return;
+
       submitBtn.disabled = true;
+      saveStatus.textContent = 'Saving…';
       try{
+        const data = {
+          expatName, expatCountry, expatPassport, expatWorkPermit, expatAddress,
+          supName, supId, supPermanentAddress, supCurrentAddress, supContact,
+        };
+
         if(editingId){
-          await db.collection('entries').doc(editingId).update({ name, country, passport, occupation, employer, phone, arrivalDate });
+          await db.collection('entries').doc(editingId).update(data);
           showToast('Entry updated');
         }else{
-          await db.collection('entries').add({
-            name, country, passport, occupation, employer, phone, arrivalDate,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            createdBy: auth.currentUser ? auth.currentUser.email : null
-          });
+          data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          data.createdBy = auth.currentUser ? auth.currentUser.email : null;
+          await db.collection('entries').add(data);
           showToast('Entry added');
         }
         resetForm();
       }catch(e){
+        saveStatus.textContent = '';
         showToast('Could not save — check your connection');
       }finally{
         submitBtn.disabled = false;
       }
     });
 
+    function loadEntryIntoForm(entry, id){
+      editingId = id;
+      fExpatName.value = entry.expatName || ''; fExpatCountry.value = entry.expatCountry || ''; fExpatPassport.value = entry.expatPassport || '';
+      fExpatWorkPermit.value = entry.expatWorkPermit || ''; fExpatAddress.value = entry.expatAddress || '';
+      fSupName.value = entry.supName || ''; fSupId.value = entry.supId || '';
+      fSupPermanentAddress.value = entry.supPermanentAddress || ''; fSupCurrentAddress.value = entry.supCurrentAddress || '';
+      fSupContact.value = entry.supContact || '';
+
+      submitBtn.textContent = 'Save changes';
+      cancelBtn.classList.remove('hidden');
+      editingBadge.classList.remove('hidden');
+      saveStatus.textContent = '';
+      fExpatName.scrollIntoView({behavior:'smooth', block:'center'}); fExpatName.focus();
+    }
+
     if(heroRecentList){
       heroRecentList.addEventListener('click', (ev) => {
         const btn = ev.target.closest('.hero-recent-view');
         if(!btn) return;
         const id = btn.dataset.viewId;
-        searchInput.value = '';
-        render();
-        const targetRow = list.querySelector(`.row[data-id="${id}"]`);
-        if(targetRow){
-          targetRow.scrollIntoView({behavior:'smooth', block:'center'});
-          targetRow.style.transition = 'background-color .3s ease';
-          targetRow.style.backgroundColor = '#FBF0DE';
-          setTimeout(() => { targetRow.style.backgroundColor = ''; }, 1400);
+        const entry = entries.find(e => e.id === id);
+        if(!entry) return;
+        if(opts.admin && list && list.isConnected){
+          // Admin still has the full ledger below — jump to and highlight that row.
+          searchInput.value = '';
+          render();
+          const targetRow = list.querySelector(`.row[data-id="${id}"]`);
+          if(targetRow){
+            targetRow.scrollIntoView({behavior:'smooth', block:'center'});
+            targetRow.style.transition = 'background-color .3s ease';
+            targetRow.style.backgroundColor = '#FBF0DE';
+            setTimeout(() => { targetRow.style.backgroundColor = ''; }, 1400);
+          }
+        }else{
+          // No full ledger shown — open this entry straight into the edit form instead.
+          loadEntryIntoForm(entry, id);
         }
       });
     }
@@ -816,16 +891,10 @@ try{
       const entry = entries.find(e => e.id === id);
       if(!entry) return;
       if(ev.target.closest('.edit-btn')){
-        editingId = id;
-        fName.value = entry.name; fCountry.value = entry.country; fPassport.value = entry.passport;
-        fOccupation.value = entry.occupation || ''; fEmployer.value = entry.employer || '';
-        fPhone.value = entry.phone || ''; fArrival.value = entry.arrivalDate || '';
-        formTitle.textContent = 'Edit entry'; submitBtn.textContent = 'Save changes';
-        cancelBtn.classList.remove('hidden');
-        fName.scrollIntoView({behavior:'smooth', block:'center'}); fName.focus();
+        loadEntryIntoForm(entry, id);
       }
       if(ev.target.closest('.del-btn')){
-        if(confirm(`Remove "${entry.name}" from the dafthar?`)){
+        if(confirm(`Remove "${entry.expatName}" from the dafthar?`)){
           await db.collection('entries').doc(id).delete();
           if(editingId === id) resetForm();
           showToast('Entry deleted');
@@ -859,11 +928,11 @@ try{
         if(!parsed){
           scanStatus.textContent = "Couldn't read the passport clearly. Try a clearer, well-lit, straight-on photo of the main ID page — or just enter details manually below.";
         }else{
-          if(parsed.name) fName.value = parsed.name;
-          if(parsed.country) fCountry.value = parsed.country;
-          if(parsed.passport) fPassport.value = parsed.passport;
+          if(parsed.name) fExpatName.value = parsed.name;
+          if(parsed.country) fExpatCountry.value = parsed.country;
+          if(parsed.passport) fExpatPassport.value = parsed.passport;
           scanStatus.textContent = 'Filled in from scan — please double check the fields below before saving, OCR is not always perfect.';
-          fName.scrollIntoView({behavior:'smooth', block:'center'});
+          fExpatName.scrollIntoView({behavior:'smooth', block:'center'});
         }
       }catch(e){
         scanStatus.textContent = 'Could not process that photo. Please try again or enter details manually.';
@@ -980,17 +1049,21 @@ try{
       };
       const hasNameHeader = colIndex(['fullname','name']) > -1;
 
-      let idxName, idxCountry=-1, idxPassport=-1, idxOccupation=-1, idxEmployer=-1, idxPhone=-1, idxArrival=-1;
+      let idxName, idxCountry=-1, idxPassport=-1, idxWorkPermit=-1, idxAddress=-1;
+      let idxSupName=-1, idxSupId=-1, idxSupPermanentAddress=-1, idxSupCurrentAddress=-1, idxSupContact=-1;
       let dataLines;
 
       if(hasNameHeader){
         idxName = colIndex(['fullname','name']);
         idxCountry = colIndex(['country']);
         idxPassport = colIndex(['passportnumber','passport']);
-        idxOccupation = colIndex(['occupation','jobtitle']);
-        idxEmployer = colIndex(['employer','sponsor']);
-        idxPhone = colIndex(['phone','phonenumber']);
-        idxArrival = colIndex(['arrivaldate','dateofarrival']);
+        idxWorkPermit = colIndex(['workpermitnumber','workpermit']);
+        idxAddress = colIndex(['currentaddress','address']);
+        idxSupName = colIndex(['supervisorfullname','supervisorname']);
+        idxSupId = colIndex(['supervisoridnumber','supervisorid']);
+        idxSupPermanentAddress = colIndex(['supervisorpermanentaddress']);
+        idxSupCurrentAddress = colIndex(['supervisorcurrentaddress']);
+        idxSupContact = colIndex(['supervisorcontactnumber','supervisorcontact','supervisorphone']);
         dataLines = lines.slice(1);
       }else{
         // Plain list mode: every line is just a name (commas allowed as part of the name are fine too).
@@ -1008,13 +1081,16 @@ try{
         const name = (cols[idxName] || '').trim();
         if(!name){ skipped++; continue; }
         const entry = {
-          name,
-          country: idxCountry > -1 ? (cols[idxCountry] || '').trim() : '',
-          passport: idxPassport > -1 ? (cols[idxPassport] || '').trim().toUpperCase() : '',
-          occupation: idxOccupation > -1 ? (cols[idxOccupation] || '').trim() : '',
-          employer: idxEmployer > -1 ? (cols[idxEmployer] || '').trim() : '',
-          phone: idxPhone > -1 ? (cols[idxPhone] || '').trim() : '',
-          arrivalDate: idxArrival > -1 ? (cols[idxArrival] || '').trim() : '',
+          expatName: name,
+          expatCountry: idxCountry > -1 ? (cols[idxCountry] || '').trim() : '',
+          expatPassport: idxPassport > -1 ? (cols[idxPassport] || '').trim().toUpperCase() : '',
+          expatWorkPermit: idxWorkPermit > -1 ? (cols[idxWorkPermit] || '').trim() : '',
+          expatAddress: idxAddress > -1 ? (cols[idxAddress] || '').trim() : '',
+          supName: idxSupName > -1 ? (cols[idxSupName] || '').trim() : '',
+          supId: idxSupId > -1 ? (cols[idxSupId] || '').trim() : '',
+          supPermanentAddress: idxSupPermanentAddress > -1 ? (cols[idxSupPermanentAddress] || '').trim() : '',
+          supCurrentAddress: idxSupCurrentAddress > -1 ? (cols[idxSupCurrentAddress] || '').trim() : '',
+          supContact: idxSupContact > -1 ? (cols[idxSupContact] || '').trim() : '',
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           createdBy: auth.currentUser ? auth.currentUser.email : null
         };
@@ -1083,8 +1159,11 @@ try{
 
     exportBtn.addEventListener('click', () => {
       if(entries.length === 0){ showToast('Nothing to export yet'); return; }
-      const header = ['#','FullName','Country','PassportNumber','Occupation','Employer','Phone','ArrivalDate'];
-      const rows = entries.map((e,i) => [i+1, e.name, e.country, e.passport, e.occupation||'', e.employer||'', e.phone||'', e.arrivalDate||'']);
+      const header = ['#','FullName','Country','PassportNumber','WorkPermitNumber','CurrentAddress','SupervisorFullName','SupervisorIDNumber','SupervisorPermanentAddress','SupervisorCurrentAddress','SupervisorContactNumber'];
+      const rows = entries.map((e,i) => [
+        i+1, e.expatName||'', e.expatCountry||'', e.expatPassport||'', e.expatWorkPermit||'', e.expatAddress||'',
+        e.supName||'', e.supId||'', e.supPermanentAddress||'', e.supCurrentAddress||'', e.supContact||''
+      ]);
       const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
       const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
